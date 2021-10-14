@@ -216,7 +216,52 @@ public class SodaControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void whenPATCHIsCalledToDecrementDiscountThenOKstatusIsReturned() throws Exception {
+        QuantityDTO quantityDTO = QuantityDTO.builder()
+                .quantity(5)
+                .build();
 
+        SodaDTO sodaDTO = SodaDTOBuilder.builder().build().toSodaDTO();
+        sodaDTO.setQuantity(sodaDTO.getQuantity() + quantityDTO.getQuantity());
+
+        when(sodaService.decrement(VALID_SODA_ID, quantityDTO.getQuantity())).thenReturn(sodaDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(SODA_API_URL_PATH + "/" + VALID_SODA_ID + SODA_API_SUBPATH_DECREMENT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(quantityDTO))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is(sodaDTO.getName())))
+                .andExpect(jsonPath("$.size", is(sodaDTO.getSize().toString())))
+                .andExpect(jsonPath("$.quantity", is(sodaDTO.getQuantity())));
+    }
+
+    @Test
+    void whenPATCHIsCalledToDecrementLowerThanZeroThenBadRequestStatusIsReturned() throws Exception {
+        QuantityDTO quantityDTO = QuantityDTO.builder()
+                .quantity(60)
+                .build();
+
+        SodaDTO sodaDTO = SodaDTOBuilder.builder().build().toSodaDTO();
+        sodaDTO.setQuantity(sodaDTO.getQuantity() + quantityDTO.getQuantity());
+
+        when(sodaService.decrement(VALID_SODA_ID, quantityDTO.getQuantity())).thenThrow(SodaStockExceededException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(SODA_API_URL_PATH + "/" + VALID_SODA_ID + SODA_API_SUBPATH_DECREMENT_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(quantityDTO))).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenPATCHIsCalledWithInvalidSodaIdToDecrementThenNotFoundStatusIsReturned() throws Exception {
+        QuantityDTO quantityDTO = QuantityDTO.builder()
+                .quantity(5)
+                .build();
+
+        when(sodaService.decrement(INVALID_SODA_ID, quantityDTO.getQuantity())).thenThrow(SodaNotFoundException.class);
+        mockMvc.perform(MockMvcRequestBuilders.patch(SODA_API_URL_PATH + "/" + INVALID_SODA_ID + SODA_API_SUBPATH_DECREMENT_URL)
+                        .contentType(MediaType.APPLICATION_JSON).content(asJsonString(quantityDTO)))
+                .andExpect(status().isNotFound());
+    }
 
 
 

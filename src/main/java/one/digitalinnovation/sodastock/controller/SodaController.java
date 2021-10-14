@@ -56,6 +56,11 @@ public class SodaController {
         return sodaService.increment(id, quantityDTO.getQuantity());
     }
 
+    @PatchMapping("/{id}/decrement")
+    public SodaDTO decrement(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws SodaNotFoundException, SodaStockExceededException{
+        return sodaService.decrement(id, quantityDTO.getQuantity());
+    }
+
 
 }
 
