@@ -4,7 +4,7 @@ Projeto desenvolvido durante o bootcamp da Everis New Talents - Java, oferecido 
 
 
 
-**Foi utilizado: **
+** Foi utilizado: **
 
 - Java 16 
 - Maven 
